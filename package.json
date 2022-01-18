@@ -24,6 +24,6 @@
     "generate-changelog": "1.8.0"
   },
   "dependencies": {
-    "koromerzhin-dependencies": "^1.1.1"
+    "koromerzhin-dependencies": "1.1.1"
   }
 }
