@@ -1,0 +1,212 @@
+version: "3"
+
+networks:
+  proxywebserver:
+    driver: overlay
+    external: true
+  serverwebserver:
+    driver: overlay
+    external: true
+
+volumes:
+  traefik_certs:
+  jenkins_data:
+  nextcloud_data:
+  portainer_data:
+  mariadb_data:
+
+services:
+  redmine:
+    image: redmine:4.2.1
+    networks:
+      - serverwebserver
+      - proxywebserver
+    depends_on:
+      - mariadb
+      - mailhog
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.redmine.rule=HostRegexp(`redmine.traefik.me`, `redmine.{ip:.*}.traefik.me`)"
+        - "traefik.http.routers.redmine-tls.tls.domains[0].main=redmine.traefik.me"
+        - "traefik.http.routers.redmine-tls.tls.domains[0].sans=redmine-*.traefik.me"
+        - "traefik.http.services.redmine.loadbalancer.server.port=3000"
+  nextcloud:
+    image: nextcloud:21.0.2-apache
+    environment:
+      - MYSQL_DATABASE=nextcloud_bdd
+      - MYSQL_USER=nextcloud
+      - MYSQL_PASSWORD=passwordbdd
+      - MYSQL_HOST=mariadb
+      - NEXTCLOUD_ADMIN_USER=admin
+      - NEXTCLOUD_ADMIN_PASSWORD=password
+      - NEXTCLOUD_TRUSTED_DOMAINS=nextcloud.traefik.me
+    networks:
+      - serverwebserver
+      - proxywebserver
+    volumes:
+      - nextcloud_data:/var/www/html/data
+    depends_on:
+      - mariadb
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.nextcloud.rule=HostRegexp(`nextcloud.traefik.me`, `nextcloud.{ip:.*}.traefik.me`)"
+        - "traefik.http.routers.nextcloud-tls.tls.domains[0].main=nextcloud.traefik.me"
+        - "traefik.http.routers.nextcloud-tls.tls.domains[0].sans=nextcloud-*.traefik.me"
+        - "traefik.http.services.nextcloud.loadbalancer.server.port=80"
+  keycloak:
+    image: jboss/keycloak:14.0.0
+    environment:
+      DB_VENDOR: mariadb
+      DB_ADDR: mariadb
+      DB_DATABASE: keycloak_bdd
+      DB_USER: keycloak
+      DB_PASSWORD: passwordbdd
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: Pa55w0rd
+    networks:
+      - serverwebserver
+      - proxywebserver
+    depends_on:
+      - mariadb
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.keycloak.rule=HostRegexp(`keycloak.traefik.me`, `keycloak.{ip:.*}.traefik.me`)"
+        - "traefik.http.routers.keycloak-tls.tls.domains[0].main=keycloak.traefik.me"
+        - "traefik.http.routers.keycloak-tls.tls.domains[0].sans=keycloak-*.traefik.me"
+        - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
+  jenkins:
+    image: jenkins/jenkins:lts
+    volumes:
+      - jenkins_data:/var/jenkins_home
+    networks:
+      - serverwebserver
+      - proxywebserver
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.jenkins.rule=HostRegexp(`jenkins.traefik.me`, `jenkins.{ip:.*}.traefik.me`)"
+        - "traefik.http.routers.jenkins-tls.tls.domains[0].main=jenkins.traefik.me"
+        - "traefik.http.routers.jenkins-tls.tls.domains[0].sans=jenkins-*.traefik.me"
+        - "traefik.http.services.jenkins.loadbalancer.server.port=8080"
+  mercure:
+    image: dunglas/mercure:v0.13
+    environment:
+      MERCURE_PUBLISHER_JWT_KEY: "SDDErzDziEaSFkO"
+      MERCURE_SUBSCRIBER_JWT_KEY: "SDDErzDziEaSFkO"
+      ALLOW_ANONYMOUS: 1
+      PUBLISH_ALLOWED_ORIGINS: "*"
+      CORS_ALLOWED_ORIGINS: "*"
+    networks:
+      - serverwebserver
+    depends_on:
+      - redis
+    deploy:
+      labels:
+        - "traefik.enable=false"
+  redis:
+    image: redis:6.2.6
+    networks:
+      - serverwebserver
+    deploy:
+      labels:
+        - "traefik.enable=false"
+  mariadb:
+    image: mariadb:10.7.1
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      TZ: Europe/Paris
+    volumes:
+      - ${PWD}/mariadb_init:/docker-entrypoint-initdb.d
+      - mariadb_data:/var/lib/mysql
+      - ${PWD}/dump:/dump
+    networks:
+      - serverwebserver
+    deploy:
+      labels:
+        - "traefik.enable=false"
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    networks:
+      - serverwebserver
+      - proxywebserver
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.mailhog.rule=HostRegexp(`mailhog.traefik.me`, `mailhog.{ip:.*}.traefik.me`)"
+        - "traefik.http.services.mailhog.loadbalancer.server.port=8025"
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:5.1.1
+    environment:
+      PMA_HOST: mariadb
+    depends_on:
+      - mariadb
+    networks:
+      - serverwebserver
+      - proxywebserver
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.phpmyadmin.rule=HostRegexp(`phpmyadmin.traefik.me`, `phpmyadmin.{ip:.*}.traefik.me`)"
+        - "traefik.http.services.phpmyadmin.loadbalancer.server.port=80"
+  portainer:
+    image: portainer/portainer-ce:2.11.0
+    networks:
+      - proxywebserver
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data portainer/portainer-ce
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.portainer.rule=HostRegexp(`portainer.traefik.me`, `portainer.{ip:.*}.traefik.me`)"
+        - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+  reverse:
+    image: alpine
+    command: sh -c "cd /etc/ssl/traefik && wget traefik.me/cert.pem -O cert.pem && wget traefik.me/privkey.pem -O privkey.pem"
+    volumes:
+      - traefik_certs:/etc/ssl/traefik
+    deploy:
+      restart_policy:
+        condition: none
+      labels:
+        - "traefik.enable=false"
+  traefik:
+    # The official v2 Traefik docker image
+    image: traefik:v2.5.6
+    environment:
+      - TZ=Europe/Paris
+    # Enables the web UI and tells Traefik to listen to docker
+    ports:
+      - "80:80"
+      - "443:443"
+    command:
+      - --api.insecure=true # set to 'false' on production
+      - --api.dashboard=true # see https://docs.traefik.io/v2.0/operations/dashboard/#secure-mode for how to secure the dashboard
+      - --api.debug=true # enable additional endpoints for debugging and profiling
+      - --log.level=DEBUG # debug while we get it working, for more levels/info see https://docs.traefik.io/observability/logs/
+      - --providers.docker=true
+      - --providers.docker.swarmMode=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=proxywebserver
+      - --entrypoints.web.address=:80
+      - --entrypoints.web-secured.address=:443
+    networks:
+      - proxywebserver
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - ${PWD}/config/letsencrypt:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${PWD}/config/traefik/traefik.toml:/etc/traefik/traefik.toml
+      - ${PWD}/config/traefik/tls.yml:/etc/traefik/tls.yml
+      - traefik_certs:/etc/ssl/traefik
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.traefik.rule=HostRegexp(`traefik.traefik.me`, `traefik.{ip:.*}.traefik.me`)"
+        - "traefik.http.services.traefik.loadbalancer.server.port=8080"
