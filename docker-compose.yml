@@ -24,6 +24,10 @@ services:
     depends_on:
       - mariadb
       - mailhog
+    environment:
+      - MYSQL_USER=redmine
+      - MYSQL_PASSWORD=passwordbdd
+      - MYSQL_DATABASE=redmine_bdd
     deploy:
       labels:
         - "traefik.enable=true"
