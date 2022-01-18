@@ -32,7 +32,7 @@ services:
         - "traefik.http.routers.redmine-tls.tls.domains[0].sans=redmine-*.traefik.me"
         - "traefik.http.services.redmine.loadbalancer.server.port=3000"
   nextcloud:
-    image: nextcloud:21.0.2-apache
+    image: nextcloud:21.0.7-apache
     environment:
       - MYSQL_DATABASE=nextcloud_bdd
       - MYSQL_USER=nextcloud
