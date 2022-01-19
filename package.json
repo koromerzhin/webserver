@@ -1,0 +1,29 @@
+{
+  "name": "@koromerzhin/webserver",
+  "version": "1.0.0",
+  "description": "Template de nouveau repository",
+  "scripts": {
+    "linter-markdown": "markdownlint",
+    "contributors": "all-contributors",
+    "readme": "readme",
+    "licenses": "license-checker",
+    "changelog": "changelog"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/koromerzhin/webserver.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/koromerzhin/webserver/issues"
+  },
+  "homepage": "https://github.com/koromerzhin/webserver#readme",
+  "devDependencies": {
+    "generate-changelog": "1.8.0"
+  },
+  "dependencies": {
+    "koromerzhin-dependencies": "1.1.1"
+  }
+}
