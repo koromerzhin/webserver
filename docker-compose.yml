@@ -33,7 +33,9 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.transmission.rule=HostRegexp(`transmission.traefik.me`, `transmission.{ip:.*}.traefik.me`)"
+        - "traefik.http.routers.transmission.rule=Host(`transmission.traefik.me`)"
+        - "traefik.http.routers.transmission-tls.tls.domains[0].main=transmission.traefik.me"
+        - "traefik.http.routers.transmission.tls=true"
         - "traefik.http.services.transmission.loadbalancer.server.port=9091"
   redmine:
     image: redmine:4.2.1
@@ -51,7 +53,9 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.redmine.rule=HostRegexp(`redmine.traefik.me`, `redmine.{ip:.*}.traefik.me`)"
+        - "traefik.http.routers.redmine.rule=Host(`redmine.traefik.me`)"
+        - "traefik.http.routers.redmine-tls.tls.domains[0].main=redmine.traefik.me"
+        - "traefik.http.routers.redmine.tls=true"
         - "traefik.http.services.redmine.loadbalancer.server.port=3000"
   nextcloud:
     image: nextcloud:21.0.8-apache
@@ -74,7 +78,9 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.nextcloud.rule=HostRegexp(`nextcloud.traefik.me`, `nextcloud.{ip:.*}.traefik.me`)"
+        - "traefik.http.routers.nextcloud.rule=Host(`nextcloud.traefik.me`)"
+        - "traefik.http.routers.nextcloud-tls.tls.domains[0].main=nextcloud.traefik.me"
+        - "traefik.http.routers.nextcloud.tls=true"
         - "traefik.http.services.nextcloud.loadbalancer.server.port=80"
   keycloak:
     image: jboss/keycloak:14.0.0
@@ -94,7 +100,9 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.keycloak.rule=HostRegexp(`keycloak.traefik.me`, `keycloak.{ip:.*}.traefik.me`)"
+        - "traefik.http.routers.keycloak.rule=Host(`keycloak.traefik.me`)"
+        - "traefik.http.routers.keycloak-tls.tls.domains[0].main=keycloak.traefik.me"
+        - "traefik.http.routers.keycloak.tls=true"
         - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
   jenkins:
     image: jenkins/jenkins:lts
@@ -106,7 +114,9 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.jenkins.rule=HostRegexp(`jenkins.traefik.me`, `jenkins.{ip:.*}.traefik.me`)"
+        - "traefik.http.routers.jenkins.rule=Host(`jenkins.traefik.me`)"
+        - "traefik.http.routers.jenkins-tls.tls.domains[0].main=jenkins.traefik.me"
+        - "traefik.http.routers.jenkins.tls=true"
         - "traefik.http.services.jenkins.loadbalancer.server.port=8080"
   mercure:
     image: dunglas/mercure:v0.13
@@ -153,7 +163,9 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.mailhog.rule=HostRegexp(`mailhog.traefik.me`, `mailhog.{ip:.*}.traefik.me`)"
+        - "traefik.http.routers.mailhog.rule=Host(`mailhog.traefik.me`)"
+        - "traefik.http.routers.mailhog-tls.tls.domains[0].main=mailhog.traefik.me"
+        - "traefik.http.routers.mailhog.tls=true"
         - "traefik.http.services.mailhog.loadbalancer.server.port=8025"
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:5.1.2
@@ -167,7 +179,9 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.phpmyadmin.rule=HostRegexp(`phpmyadmin.traefik.me`, `phpmyadmin.{ip:.*}.traefik.me`)"
+        - "traefik.http.routers.phpmyadmin.rule=Host(`phpmyadmin.traefik.me`)"
+        - "traefik.http.routers.phpmyadmin-tls.tls.domains[0].main=phpmyadmin.traefik.me"
+        - "traefik.http.routers.phpmyadmin.tls=true"
         - "traefik.http.services.phpmyadmin.loadbalancer.server.port=80"
   portainer:
     image: portainer/portainer-ce:2.11.1
@@ -179,7 +193,9 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.portainer.rule=HostRegexp(`portainer.traefik.me`, `portainer.{ip:.*}.traefik.me`)"
+        - "traefik.http.routers.portainer.rule=Host(`portainer.traefik.me`)"
+        - "traefik.http.routers.portainer-tls.tls.domains[0].main=portainer.traefik.me"
+        - "traefik.http.routers.portainer.tls=true"
         - "traefik.http.services.portainer.loadbalancer.server.port=9000"
   reverse:
     image: alpine
@@ -226,5 +242,7 @@ services:
           - node.role == manager
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.traefik.rule=HostRegexp(`traefik.traefik.me`, `traefik.{ip:.*}.traefik.me`)"
-        - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+        - "traefik.http.routers.proxy.rule=Host(`proxy.traefik.me`)"
+        - "traefik.http.routers.proxy-tls.tls.domains[0].main=proxy.traefik.me"
+        - "traefik.http.routers.proxy.tls=true"
+        - "traefik.http.services.proxy.loadbalancer.server.port=8080"
