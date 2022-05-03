@@ -20,6 +20,14 @@ Software:
 - make
 - npm
 
+## Download
+
+```sh
+git clone git@github.com:koromerzhin/webserver.git webserver
+cd webserver
+git submodule update --init
+```
+
 ## Install
 
 ```sh
