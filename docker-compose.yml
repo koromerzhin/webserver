@@ -38,7 +38,7 @@ services:
         - "traefik.http.routers.transmission.tls=true"
         - "traefik.http.services.transmission.loadbalancer.server.port=9091"
   redmine:
-    image: redmine:5.0.0
+    image: redmine:5.0.1
     networks:
       - serverwebserver
       - proxywebserver
