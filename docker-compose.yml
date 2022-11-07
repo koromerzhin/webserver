@@ -58,7 +58,7 @@ services:
         - "traefik.http.routers.redmine.tls=true"
         - "traefik.http.services.redmine.loadbalancer.server.port=3000"
   nextcloud:
-    image: nextcloud:24.0.4-apache
+    image: nextcloud:25.0.1-apache
     environment:
       - SMTP_HOST=mailhog
       - MYSQL_DATABASE=nextcloud_bdd
