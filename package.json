@@ -24,6 +24,6 @@
   },
   "homepage": "https://github.com/koromerzhin/webserver#readme",
   "dependencies": {
-    "korojscommands": "^1.2.10"
+    "korojscommands": "^1.2.11"
   }
 }
