@@ -3,11 +3,14 @@
   "version": "1.0.0",
   "description": "Template de nouveau repository",
   "scripts": {
-    "linter-markdown": "markdownlint",
-    "contributors": "all-contributors",
-    "readme": "readme",
-    "licenses": "license-checker",
-    "changelog": "changelog"
+    "docker:ls": "korojscommands docker_ls",
+    "docker:create-network": "korojscommands docker_create-network",
+    "docker:deploy": "korojscommands docker_deploy --files docker-compose.yml",
+    "docker:getpull-image": "korojscommands docker_getpull-image --files docker-compose.yml",
+    "docker:swarm-init": "korojscommands docker_swarm-init",
+    "exec": "npm-run-all docker:swarm-init docker:create-network docker:getpull-image docker:deploy waiting:all docker:ls",
+    "lint:markdown": "markdownlint README.md",
+    "waiting:all": "korojscommands docker_waiting --container mercure redis mariadb postgresql mailhog phpmyadmin portainer traefik --status running"
   },
   "repository": {
     "type": "git",
@@ -21,6 +24,6 @@
   },
   "homepage": "https://github.com/koromerzhin/webserver#readme",
   "dependencies": {
-    "koromerzhin-dependencies": "1.3.3"
+    "korojscommands": "^1.2.10"
   }
 }

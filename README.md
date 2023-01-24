@@ -3,47 +3,39 @@
 ![Version](https://img.shields.io/badge/version-1.0.0-blue.svg?cacheSeconds=2592000)
 ![Documentation](https://img.shields.io/badge/documentation-yes-brightgreen.svg)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/koromerzhin/webserver/graphs/commit-activity)
-![Continuous Integration](https://github.com/koromerzhin/webserver/workflows/Continuous%20Integration/badge.svg?branch=develop)
+![Continuous Integration](https://github.com/koromerzhin/webserver/workflows/ci/badge.svg?branch=develop)
 
 > Template de nouveau repository
 
 ## 🏠 [Homepage](https://github.com/koromerzhin/webserver#readme)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#-contributors)
+![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#-contributors)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ## Need
 
 Software:
 
-- make
 - npm
 
 ## Download
 
 ```sh
-git clone git@github.com:koromerzhin/webserver.git webserver
+git clone --recurse-submodules git@github.com:koromerzhin/webserver.git webserver
 cd webserver
-git submodule update --init
 ```
 
 ## Install
 
 ```sh
-make install
+npm install
 ```
 
-## after git add
+## Exec
 
 ```sh
-make git check
-```
-
-## Help
-
-```sh
-make help
+npm run exec
 ```
 
 ## Author
@@ -85,9 +77,6 @@ Thanks goes to these wonderful people
 <table>
   <tr>
     <td align="center"><a href="https://github.com/koromerzhin"><img src="https://avatars0.githubusercontent.com/u/308012?v=4" width="100px;" alt=""/><br /><sub><b>Le TOULLEC Martial</b></sub></a></td>
-    <td align="center"><a href="https://github.com/apps/renovate"><img src="https://avatars1.githubusercontent.com/in/2740?v=4" width="100px;" alt=""/><br /><sub><b>renovate[bot]</b></sub></a></td>
-    <td align="center"><a href="https://github.com/apps/restyled-io"><img src="https://avatars0.githubusercontent.com/in/5851?v=4" width="100px;" alt=""/><br /><sub><b>restyled-io[bot]</b></sub></a></td>
-    <td align="center"><a href="https://github.com/apps/dependabot"><img src="https://avatars.githubusercontent.com/in/29110?v=4" width="100px;" alt=""/><br /><sub><b>dependabot[bot]</b></sub></a></td>
   </tr>
 </table>
 

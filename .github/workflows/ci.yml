@@ -1,4 +1,4 @@
-name: Continuous Integration
+name: ci
 on: [push]
 jobs:
   tests:
@@ -6,34 +6,43 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        operating-system: [ubuntu-20.04]
+        operating-system: [ubuntu-22.04]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           submodules: recursive
-      - name: Cache npm packages
-        id: npm-cache
-        uses: actions/cache@v3
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
       - name: Install npm dependencies
-        if: steps.npm-cache.outputs.cache-hit != 'true'
-        run: make node_modules
+        run: npm install
       - name: 'Docker swarm init'
-        run: make docker swarm-init
+        run: npm run docker:swarm-init
       - name: 'Create proxy network'
-        run: make docker create-network
+        run: npm run docker:create-network
       - name: 'Image pull'
-        run: make docker image-pull
+        run: npm run docker:getpull-image
       - name: 'Build containers'
-        run: make docker deploy
+        run: npm run docker:deploy
       - name: 'sleep'
-        run: make sleep 60
+        run: npm run waiting:all
       - name: 'docker ls'
-        run: make docker ls
+        run: npm run docker:ls
       - name: linter readme
-        run: make linter readme
+        run: npm run lint:markdown
+      - name: Check contributors
+        if: github.ref == 'refs/heads/develop'
+        run: npx all-contributors check
+  exec:
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      fail-fast: false
+      matrix:
+        operating-system: [ubuntu-22.04]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Install npm dependencies
+        run: npm install
+      - name: 'NPM EXEC'
+        run: npm run exec
