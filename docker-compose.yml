@@ -134,7 +134,7 @@ services:
       labels:
         - "traefik.enable=false"
   redis:
-    image: redis:7.0.10
+    image: redis:7.0.11
     networks:
       - serverwebserver
     deploy:
