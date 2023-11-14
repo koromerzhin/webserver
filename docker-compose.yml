@@ -38,7 +38,7 @@ services:
         - "traefik.http.routers.transmission.tls=true"
         - "traefik.http.services.transmission.loadbalancer.server.port=9091"
   redmine:
-    image: redmine:5.0.5
+    image: redmine:5.0.6
     networks:
       - serverwebserver
       - proxywebserver
@@ -58,7 +58,7 @@ services:
         - "traefik.http.routers.redmine.tls=true"
         - "traefik.http.services.redmine.loadbalancer.server.port=3000"
   nextcloud:
-    image: nextcloud:27.1.1-apache
+    image: nextcloud:27.1.3-apache
     environment:
       - SMTP_HOST=mailhog
       - MYSQL_DATABASE=nextcloud_bdd
@@ -134,7 +134,7 @@ services:
       labels:
         - "traefik.enable=false"
   redis:
-    image: redis:7.2.1
+    image: redis:7.2.3
     networks:
       - serverwebserver
     deploy:
@@ -184,7 +184,7 @@ services:
         - "traefik.http.routers.phpmyadmin.tls=true"
         - "traefik.http.services.phpmyadmin.loadbalancer.server.port=80"
   portainer:
-    image: portainer/portainer-ce:2.19.1
+    image: portainer/portainer-ce:2.19.2
     networks:
       - proxywebserver
     volumes:
@@ -209,7 +209,7 @@ services:
         - "traefik.enable=false"
   traefik:
     # The official v2 Traefik docker image
-    image: traefik:v2.10.4
+    image: traefik:2.10.5
     environment:
       - TZ=Europe/Paris
     # Enables the web UI and tells Traefik to listen to docker
