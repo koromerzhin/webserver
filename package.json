@@ -10,7 +10,7 @@
     "docker:swarm-init": "korojscommands docker_swarm-init",
     "exec": "npm-run-all docker:swarm-init docker:create-network docker:getpull-image docker:deploy waiting:all docker:ls",
     "lint:markdown": "markdownlint README.md",
-    "waiting:all": "korojscommands docker_waiting --container transmission redmine nextcloud mercure redis keycloak mariadb jenkins mailhog phpmyadmin portainer traefik --status running"
+    "waiting:all": "korojscommands docker_waiting --container transmission redmine nextcloud mercure redis mariadb jenkins mailhog phpmyadmin portainer traefik --status running"
   },
   "repository": {
     "type": "git",
