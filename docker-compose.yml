@@ -82,28 +82,6 @@ services:
         - "traefik.http.routers.nextcloud-tls.tls.domains[0].main=nextcloud.traefik.me"
         - "traefik.http.routers.nextcloud.tls=true"
         - "traefik.http.services.nextcloud.loadbalancer.server.port=80"
-  keycloak:
-    image: jboss/keycloak:16.1.1
-    environment:
-      DB_VENDOR: mariadb
-      DB_ADDR: mariadb
-      DB_DATABASE: keycloak_bdd
-      DB_USER: keycloak
-      DB_PASSWORD: passwordbdd
-      KEYCLOAK_USER: admin
-      KEYCLOAK_PASSWORD: Pa55w0rd
-    networks:
-      - serverwebserver
-      - proxywebserver
-    depends_on:
-      - mariadb
-    deploy:
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.keycloak.rule=Host(`keycloak.traefik.me`)"
-        - "traefik.http.routers.keycloak-tls.tls.domains[0].main=keycloak.traefik.me"
-        - "traefik.http.routers.keycloak.tls=true"
-        - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
   jenkins:
     image: jenkins/jenkins:lts
     volumes:
@@ -208,32 +186,20 @@ services:
       labels:
         - "traefik.enable=false"
   traefik:
-    # The official v2 Traefik docker image
-    image: traefik:2.10.5
+    image: traefik:v3.1.0
     environment:
       - TZ=Europe/Paris
     # Enables the web UI and tells Traefik to listen to docker
     ports:
       - "80:80"
       - "443:443"
-    command:
-      - --api.insecure=true # set to 'false' on production
-      - --api.dashboard=true # see https://docs.traefik.io/v2.0/operations/dashboard/#secure-mode for how to secure the dashboard
-      - --api.debug=true # enable additional endpoints for debugging and profiling
-      - --log.level=DEBUG # debug while we get it working, for more levels/info see https://docs.traefik.io/observability/logs/
-      - --providers.docker=true
-      - --providers.docker.swarmMode=true
-      - --providers.docker.exposedbydefault=false
-      - --providers.docker.network=proxywebserver
-      - --entrypoints.web.address=:80
-      - --entrypoints.web-secured.address=:443
     networks:
       - proxywebserver
     volumes:
       # So that Traefik can listen to the Docker events
       - ${PWD}/config/letsencrypt:/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${PWD}/config/traefik/traefik.toml:/etc/traefik/traefik.toml
+      - ${PWD}/config/traefik/traefik.yml:/etc/traefik/traefik.yml
       - ${PWD}/config/traefik/tls.yml:/etc/traefik/tls.yml
       - traefik_certs:/etc/ssl/traefik
     deploy:
