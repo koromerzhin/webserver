@@ -76,7 +76,7 @@ services:
         - "traefik.http.routers.jenkins.tls=true"
         - "traefik.http.services.jenkins.loadbalancer.server.port=8080"
   mercure:
-    image: dunglas/mercure:v0.15
+    image: dunglas/mercure:v0.16
     environment:
       MERCURE_PUBLISHER_JWT_KEY: "SDDErzDziEaSFkO"
       MERCURE_SUBSCRIBER_JWT_KEY: "SDDErzDziEaSFkO"
