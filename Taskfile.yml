@@ -1,0 +1,185 @@
+version: 3
+
+# Taskfile principal - Tâches globales et inclusions
+# Charge automatiquement les variables depuis le fichier .env s'il existe
+dotenv: [ '.env' ]
+
+includes:
+  docker: ./taskfiles/docker/Taskfile.yml
+  utils: ./taskfiles/utils/Taskfile.yml
+  env: ./taskfiles/env/Taskfile.yml
+  nodejs: ./taskfiles/nodejs/Taskfile.yml
+  download: ./taskfiles/download/Taskfile.yml
+
+vars:
+  # Variables avec valeurs par défaut depuis .env ou valeurs de fallback
+  PROJECT_NAME: '{{.PROJECT_NAME | default "webserver"}}'
+  PROJECT_VERSION: '2.0.0'
+  ENVIRONMENT: '{{.ENVIRONMENT | default "development"}}'
+  SWARM_DEFAULT_ADDR_POOL: '{{.IPSWARM | default "10.20.0.0/16"}}'
+  SWARM_ADVERTISE_ADDR: '{{.ADVERTISEADDR | default "192.168.1.46"}}'
+  STACK_NAME: '{{.STACK | default "webserver"}}'
+
+tasks:
+  default:
+    desc: "Affiche l'aide et les tâches disponibles"
+    silent: true
+    cmds:
+    - echo "🛠️  Collection de Taskfiles pour le développement"
+    - echo ""
+    - echo "Tâches globales disponibles :"
+    - task --list
+    - echo ""
+
+  info:
+    desc: "Affiche les informations du projet avec les variables d'environnement"
+    silent: true
+    cmds:
+    - |
+      echo "🛠️  {{.PROJECT_NAME}} v{{.PROJECT_VERSION}} - Collection de Taskfiles"
+      echo "Environnement: {{.ENVIRONMENT}}"
+
+  help:
+    desc: "Affiche l'aide détaillée"
+    aliases: [ h ]
+    cmds:
+    - task: default
+
+  webserver:swarm-init:
+    desc: "Initialise le projet en exécutant les tâches d'initialisation"
+    silent: true
+    cmds:
+    - task: docker:swarm:init
+
+  webserver:create-network:
+    desc: "Crée les réseaux Docker nécessaires au projet"
+    silent: true
+    cmds:
+    - task: docker:network:create
+      vars:
+        NETWORK_NAME: proxywebserver
+        NETWORK_DRIVER: overlay
+    - task: docker:network:create
+      vars:
+        NETWORK_NAME: serverwebserver
+        NETWORK_DRIVER: overlay
+
+  webserver:getpull-image:
+    desc: "Télécharge les images Docker définies dans le docker-compose.yml"
+    silent: true
+    cmds:
+    - task: docker:images:pull
+      vars:
+        COMPOSE_FILE: ./docker-compose.yml
+
+  webserver:deploy:
+    desc: "Déploie les stacks Docker définies dans les fichiers docker-compose"
+    silent: true
+    cmds:
+    - task: docker:stack:deploy
+      vars:
+        COMPOSE_FILE: ./docker-compose.yml
+        STACK_NAME: "{{.STACK_NAME}}"
+
+  webserver:waiting:
+    desc: "Attend que les services soient opérationnels"
+    silent: true
+    cmds:
+    - task: docker:stack:check:containers:ready
+      vars:
+        SERVICES: "mercure,redis,mariadb,mailtest,phpmyadmin,portainer,traefik"
+        STACK_NAME: "{{.STACK_NAME}}"
+
+  webserver:ls:
+    desc: "Liste les stacks et services Docker"
+    silent: true
+    cmds:
+    - task: docker:stack:services
+      vars:
+        STACK_NAME: "{{.STACK_NAME}}"
+
+  webserver:exec:
+    desc: "Exécute une commande dans un conteneur en cours d'exécution"
+    cmds:
+    - task: webserver:swarm-init
+    - task: webserver:create-network
+    - task: webserver:getpull-image
+    - task: webserver:deploy
+    - task: webserver:waiting
+    - task: webserver:ls
+
+  webserver:bash:
+    desc: "Ouvre un shell bash dans le conteneur MariaDB"
+    internal: true
+    silent: true
+    vars:
+      CONTAINER: '{{.CONTAINER | default ""}}'
+    cmds:
+    - task: docker:stack:shell
+      vars:
+        STACK_NAME: "{{.STACK_NAME}}"
+        SERVICE_NAME: "{{.CONTAINER}}"
+
+  bash:mariadb:
+    desc: "Ouvre un shell bash dans le conteneur MariaDB"
+    silent: true
+    cmds:
+    - task: webserver:bash
+      vars:
+        CONTAINER: mariadb
+
+  bash:mercure:
+    desc: "Ouvre un shell bash dans le conteneur Mercure"
+    silent: true
+    cmds:
+    - task: webserver:bash
+      vars:
+        CONTAINER: mercure
+
+  bash:redis:
+    desc: "Ouvre un shell bash dans le conteneur Redis"
+    silent: true
+    cmds:
+    - task: webserver:bash
+      vars:
+        CONTAINER: redis
+
+  bash:postgresql:
+    desc: "Ouvre un shell bash dans le conteneur PostgreSQL"
+    silent: true
+    cmds:
+    - task: webserver:bash
+      vars:
+        CONTAINER: postgresql
+
+  bash:mailtest:
+    desc: "Ouvre un shell bash dans le conteneur MailTest"
+    silent: true
+    cmds:
+    - task: webserver:bash
+      vars:
+        CONTAINER: mailtest
+
+  bash:phpmyadmin:
+    desc: "Ouvre un shell bash dans le conteneur phpMyAdmin"
+    silent: true
+    cmds:
+    - task: webserver:bash
+      vars:
+        CONTAINER: phpmyadmin
+
+  bash:portainer:
+    desc: "Ouvre un shell bash dans le conteneur Portainer"
+    silent: true
+    cmds:
+    - task: webserver:bash
+      vars:
+        CONTAINER: portainer
+
+  bash:traefik:
+    desc: "Ouvre un shell bash dans le conteneur Traefik"
+    silent: true
+    cmds:
+    - task: webserver:bash
+      vars:
+        CONTAINER: traefik
