@@ -1,16 +1,9 @@
 {
   "name": "@koromerzhin/webserver",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Template de nouveau repository",
   "scripts": {
-    "docker:ls": "korojscommands docker_ls",
-    "docker:create-network": "korojscommands docker_create-network",
-    "docker:deploy": "korojscommands docker_deploy --files docker-compose.yml",
-    "docker:getpull-image": "korojscommands docker_getpull-image --files docker-compose.yml",
-    "docker:swarm-init": "korojscommands docker_swarm-init",
-    "exec": "npm-run-all docker:swarm-init docker:create-network docker:getpull-image docker:deploy waiting:all docker:ls",
-    "lint:markdown": "markdownlint README.md",
-    "waiting:all": "korojscommands docker_waiting --container transmission redmine nextcloud mercure redis mariadb jenkins mailhog phpmyadmin portainer traefik --status running"
+    "lint:markdown": "markdownlint README.md"
   },
   "repository": {
     "type": "git",
@@ -23,7 +16,10 @@
     "url": "https://github.com/koromerzhin/webserver/issues"
   },
   "homepage": "https://github.com/koromerzhin/webserver#readme",
-  "dependencies": {
-    "korojscommands": "^1.2.11"
+  "devDependencies": {
+    "cypress": "^15.4.0",
+    "jscpd": "^4.0.5",
+    "markdownlint-cli": "^0.45.0",
+    "yaml": "^2.8.1"
   }
 }

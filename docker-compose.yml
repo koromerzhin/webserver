@@ -16,27 +16,6 @@ volumes:
   mariadb_data:
 
 services:
-  transmission:
-    image: linuxserver/transmission:amd64-latest
-    networks:
-      - proxywebserver
-    environment:
-      - TZ=Europe/Paris
-      - USER=usertransmission
-      - PASS=Password
-    volumes:
-      - ${PWD}/downloads:/downloads
-      - ${PWD}/watch:/watch
-    ports:
-      - 51413:51413
-      - 51413:51413/udp
-    deploy:
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.transmission.rule=Host(`transmission.traefik.me`)"
-        - "traefik.http.routers.transmission-tls.tls.domains[0].main=transmission.traefik.me"
-        - "traefik.http.routers.transmission.tls=true"
-        - "traefik.http.services.transmission.loadbalancer.server.port=9091"
   redmine:
     image: redmine:5.0.6
     networks:
@@ -186,21 +165,27 @@ services:
       labels:
         - "traefik.enable=false"
   traefik:
-    image: traefik:v3.1.0
+    image: traefik:v3.5.3
     environment:
-      - TZ=Europe/Paris
+      TZ: Europe/Paris
     # Enables the web UI and tells Traefik to listen to docker
     ports:
-      - "80:80"
-      - "443:443"
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host 
+      - target: 443
+        published: 443
+        protocol: tcp
+        mode: host 
     networks:
-      - proxywebserver
+      - proxylampy
     volumes:
       # So that Traefik can listen to the Docker events
-      - ${PWD}/config/letsencrypt:/letsencrypt
+      - ${PWD}/letsencrypt:/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${PWD}/config/traefik/traefik.yml:/etc/traefik/traefik.yml
-      - ${PWD}/config/traefik/tls.yml:/etc/traefik/tls.yml
+      - ${PWD}/traefik/traefik.yml:/etc/traefik/traefik.yml
+      - ${PWD}/traefik/middlewares.yml:/etc/traefik/middlewares.yml
       - traefik_certs:/etc/ssl/traefik
     deploy:
       placement:
