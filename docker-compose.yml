@@ -23,7 +23,7 @@ services:
       - proxywebserver
     depends_on:
       - mariadb
-      - mailhog
+      - mailtest
     environment:
       - REDMINE_DB_MYSQL=mariadb
       - REDMINE_DB_USERNAME=redmine
@@ -39,7 +39,7 @@ services:
   nextcloud:
     image: nextcloud:29.0.4-apache
     environment:
-      - SMTP_HOST=mailhog
+      - SMTP_HOST=mailtest
       - MYSQL_DATABASE=nextcloud_bdd
       - MYSQL_USER=nextcloud
       - MYSQL_PASSWORD=passwordbdd
@@ -112,18 +112,18 @@ services:
     deploy:
       labels:
         - "traefik.enable=false"
-  mailhog:
-    image: mailhog/mailhog:v1.0.1
+  mailtest:
+    image: axllent/mailpit:v1.27
     networks:
       - serverwebserver
       - proxywebserver
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.mailhog.rule=Host(`mailhog.traefik.me`)"
-        - "traefik.http.routers.mailhog-tls.tls.domains[0].main=mailhog.traefik.me"
-        - "traefik.http.routers.mailhog.tls=true"
-        - "traefik.http.services.mailhog.loadbalancer.server.port=8025"
+        - "traefik.http.routers.mailtest.rule=Host(`mailtest.traefik.me`)"
+        - "traefik.http.routers.mailtest-tls.tls.domains[0].main=mailtest.traefik.me"
+        - "traefik.http.routers.mailtest.tls=true"
+        - "traefik.http.services.mailtest.loadbalancer.server.port=8025"
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:5.2.1
     environment:
