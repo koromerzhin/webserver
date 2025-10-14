@@ -179,7 +179,7 @@ services:
         protocol: tcp
         mode: host 
     networks:
-      - proxylampy
+      - proxywebserver
     volumes:
       # So that Traefik can listen to the Docker events
       - ${PWD}/letsencrypt:/letsencrypt
