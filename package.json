@@ -1,6 +1,6 @@
 {
   "name": "@koromerzhin/webserver",
-  "version": "2.0.0",
+  "version": "0.0.1",
   "description": "Template de nouveau repository",
   "scripts": {
     "lint:markdown": "markdownlint README.md"
@@ -20,6 +20,7 @@
     "cypress": "^15.4.0",
     "jscpd": "^4.0.5",
     "markdownlint-cli": "^0.45.0",
+    "release-it": "^19.0.5",
     "yaml": "^2.8.1"
   }
 }
