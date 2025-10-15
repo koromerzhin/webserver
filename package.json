@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "description": "Template de nouveau repository",
   "scripts": {
-    "lint:markdown": "markdownlint README.md"
+    "lint:markdown": "markdownlint README.md",
+    "release": "release-it"
   },
   "repository": {
     "type": "git",
