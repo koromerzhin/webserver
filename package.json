@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Template de nouveau repository",
   "scripts": {
-    "lint:markdown": "markdownlint README.md",
     "release": "release-it"
   },
   "repository": {
@@ -20,7 +19,6 @@
   "devDependencies": {
     "cypress": "^15.4.0",
     "jscpd": "^4.0.5",
-    "markdownlint-cli": "^0.45.0",
     "release-it": "^19.0.5",
     "yaml": "^2.8.1"
   }
