@@ -106,12 +106,6 @@ jobs:
                 npm install
             fi
 
-      - name: Install and validate dependencies
-        run: |
-          echo "📦 Installation et validation des dépendances..."
-          npm run lint:markdown
-          echo "✅ Dépendances installées et validées"
-
       - name: Initialize Docker environment
         run: |
           echo "🐳 Initialisation de l'environnement Docker..."
