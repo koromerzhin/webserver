@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/koromerzhin/webserver#readme",
   "devDependencies": {
-    "cypress": "^15.4.0",
+    "cypress": "^15.7.1",
     "jscpd": "^4.0.5",
     "release-it": "^19.0.5",
     "yaml": "^2.8.1"
