@@ -47,7 +47,7 @@ jobs:
           cache-dependency-path: 'package-lock.json'
 
       - name: Setup Task
-        uses: go-task/setup-task@v1
+        uses: go-task/setup-task@v2
 
       - name: Setup Docker Compose
         uses: docker/setup-compose-action@v2
@@ -88,7 +88,7 @@ jobs:
           cache-dependency-path: 'package-lock.json'
 
       - name: Setup Task
-        uses: go-task/setup-task@v1
+        uses: go-task/setup-task@v2
 
       - name: Setup Docker Compose
         uses: docker/setup-compose-action@v2
