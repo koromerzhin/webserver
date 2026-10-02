@@ -15,7 +15,7 @@ volumes:
 
 services:
   redmine:
-    image: redmine:6.1.0
+    image: redmine:7.0.0
     networks:
       - serverwebserver
       - proxywebserver
