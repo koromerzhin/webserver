@@ -1,75 +1,120 @@
-# Welcome to @koromerzhin/webserver 👋
+# webserver 🛠️
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg?cacheSeconds=2592000)
-![Documentation](https://img.shields.io/badge/documentation-yes-brightgreen.svg)
+[![Version](https://img.shields.io/github/package-json/v/koromerzhin/webserver)](CHANGELOG.md)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/koromerzhin/webserver/graphs/commit-activity)
-![Continuous Integration](https://github.com/koromerzhin/webserver/workflows/ci/badge.svg?branch=develop)
+[![Continuous Integration](https://github.com/koromerzhin/webserver/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/koromerzhin/webserver/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> Template de nouveau repository
+> Stack web générique sur Docker Swarm : Redmine, Nextcloud, Jenkins,
+> Mercure, Redis, MariaDB, Mailpit, phpMyAdmin, Portainer et Traefik,
+> pilotée par [Task](https://taskfile.dev/).
 
-## 🏠 [Homepage](https://github.com/koromerzhin/webserver#readme)
+## Services
 
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-![All Contributors](https://img.shields.io/badge/all_contributors-5-orange.svg?style=flat-square)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
+| Service | Image | Accès |
+| ------- | ----- | ----- |
+| traefik | traefik:v3.7.14 | proxy.traefik.me (dashboard) |
+| redmine | redmine:6.1.5 | redmine.traefik.me |
+| nextcloud | nextcloud:32.0.15-apache | nextcloud.traefik.me |
+| jenkins | jenkins/jenkins:2.586 | jenkins.traefik.me |
+| mercure | dunglas/mercure:v1.1.2 | interne (/.well-known/mercure) |
+| redis | redis:8.10.2 | interne |
+| mariadb | mariadb:13.0.2 | interne (pas de port publié) |
+| mailtest | axllent/mailpit:v1.31.5 | mailtest.traefik.me |
+| phpmyadmin | phpmyadmin/phpmyadmin:5.2.3 | phpmyadmin.traefik.me |
+| portainer | portainer/portainer-ce:2.45.2 | portainer.traefik.me |
+| reverse | alpine:3.23 | certificats traefik.me (one-shot) |
 
-## Need
+Les frontaux sont sur le réseau `proxywebserver`, les backends sur
+`serverwebserver` (gérés par la stack, voir `docker-compose.yml`).
 
-Software:
+## Prérequis
 
-- npm
+- [task](https://taskfile.dev/) et [Docker](https://docs.docker.com/) (mode Swarm)
+- [Node.js](https://nodejs.org/) (version dans `.nvmrc`, `nvm use`) pour le lint
+- `openssl` pour (re)générer le mot de passe du dashboard
 
-## Download
+## Installation
 
 ```sh
-git clone --recurse-submodules git@github.com:koromerzhin/webserver.git webserver
+git clone --recursive https://github.com/koromerzhin/webserver.git webserver
 cd webserver
+npm ci
 ```
 
-## Install
+## Configuration
 
 ```sh
-npm install
+task env:init
 ```
 
-## Exec
+Crée `.env` depuis `.env.example` (sans écraser l'existant), puis
+éditez `.env` (jamais committé) : mots de passe, clés JWT Mercure
+(`openssl rand -hex 32`) et surtout `ADVERTISEADDR`, qui **doit** être une
+IP locale existante (`ip -4 addr show`) — sinon `docker swarm init`
+échoue avec « must specify a listening address ».
+
+Changez le mot de passe du dashboard Traefik (`admin` / `changeme` par défaut) :
 
 ```sh
-npm run exec
+task webserver:dashboard-password
 ```
 
-## Author
+Puis validez la configuration :
 
-👤 **koromerzhin**
+```sh
+task env:validate
+docker compose config --quiet
+```
 
-- Website: [https://www.letoullec.fr](https://www.letoullec.fr)
-- Twitter: [@koromerzhin](https://twitter.com/koromerzhin)
-- Github: [@koromerzhin](https://github.com/koromerzhin)
-- LinkedIn: [@koromerzhin](https://linkedin.com/in/koromerzhin)
+## Déploiement
 
-## 🤝 Contributing
+```sh
+task webserver:exec
+```
 
-Contributions, issues and feature requests are welcome!
-Feel free to check
-[issues page](https://github.com/koromerzhin/webserver/issues).
-You can also take a look at the
-[contributing guide](https://github.com/koromerzhin/webserver/blob/develop/CONTRIBUTING.md).
+Cela enchaîne : `.env` garanti → init Swarm → pull des images →
+`docker stack deploy` → attente des 7 services → liste. Suivi au quotidien :
 
-## Show your support
+```sh
+task webserver:ls
+task webserver:waiting
+task bash:mariadb   # shell dans un service (mariadb, redis, …)
+```
 
-Give a ⭐️ if this project helped you!
+## ⚠️ Usage local uniquement
 
-## 📝 License
+Cette stack est calibrée pour un poste de développement : hub Mercure
+ouvert (`ALLOW_ANONYMOUS`, CORS `*`), certificats `traefik.me` récupérés en
+HTTP, dashboard Traefik protégé par un simple basic-auth. Ne l'exposez pas
+telle quelle sur un réseau non maîtrisé.
+
+## Aide
+
+```sh
+task --list
+task help
+task env:show
+```
+
+## Intégration continue
+
+- `lint` : `npm ci` + `task lint:all`.
+- `launch` : recrée `.env` depuis l'exemple et déploie la stack complète
+  sur le runner — premier endroit où un secret vide ou une image cassée
+  se voient (timeout `webserver:waiting`).
+
+## 🤝 Contribution
+
+Contributions, issues et demandes de fonctionnalités bienvenues :
+[issues](https://github.com/koromerzhin/webserver/issues).
+
+## 📝 Licence
 
 Copyright © 2019 [koromerzhin](https://github.com/koromerzhin).
+Projet sous licence [MIT](https://github.com/koromerzhin/webserver/blob/develop/LICENSE).
 
-This project is
-[MIT](https://github.com/koromerzhin/webserver/blob/develop/LICENSE) licensed.
-
-## ✨ Contributors
-
-Thanks goes to these wonderful people
-([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+## ✨ Contributeurs
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
@@ -90,12 +135,3 @@ Thanks goes to these wonderful people
 <!-- prettier-ignore-end -->
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
-
-This project follows the
-[all-contributors](https://github.com/all-contributors/all-contributors)
-specification. Contributions of any kind welcome!
-
----
-
-_This README was generated with ❤️ by
-[readme-md-generator](https://github.com/kefranabg/readme-md-generator)_

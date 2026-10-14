@@ -58,7 +58,10 @@ jobs:
         run: npm ci
 
       - name: lint all
-        run: task lint:all
+        run: |
+          task env:init
+          task env:validate
+          task lint:all
 
   launch:
     name: Launch
