@@ -95,6 +95,7 @@ jobs:
         run: |
           echo "🐳 Initialisation de l'environnement Docker..."
           task env:init
+          task env:validate
           task webserver:swarm-init
           task webserver:create-network
           task webserver:getpull-image

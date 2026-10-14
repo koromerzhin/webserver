@@ -116,6 +116,7 @@ tasks:
     desc: "Déploie la stack webserver complète (swarm, images, deploy, attente, liste)"
     cmds:
     - task: env:init
+    - task: env:validate
     - task: webserver:swarm-init
     - task: webserver:getpull-image
     - task: webserver:deploy
