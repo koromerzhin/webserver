@@ -31,12 +31,12 @@ providers:
   docker:
     endpoint: 'unix:///var/run/docker.sock'
     exposedByDefault: false
-    network: proxylampy
+    network: proxywebserver
     watch: true
   file:
     filename: /etc/traefik/middlewares.yml
   swarm:
-    network: proxylampy
+    network: proxywebserver
 tls:
   certificates:
   - certFile: /etc/ssl/traefik/cert.pem

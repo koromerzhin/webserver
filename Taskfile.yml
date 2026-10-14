@@ -112,8 +112,9 @@ tasks:
         STACK_NAME: "{{.STACK_NAME}}"
 
   webserver:exec:
-    desc: "Exécute une commande dans un conteneur en cours d'exécution"
+    desc: "Déploie la stack webserver complète (swarm, réseaux, images, deploy, attente, liste)"
     cmds:
+    - task: env:init
     - task: webserver:swarm-init
     - task: webserver:create-network
     - task: webserver:getpull-image
