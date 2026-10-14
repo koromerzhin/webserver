@@ -113,11 +113,10 @@ tasks:
         STACK_NAME: "{{.STACK_NAME}}"
 
   webserver:exec:
-    desc: "Déploie la stack webserver complète (swarm, réseaux, images, deploy, attente, liste)"
+    desc: "Déploie la stack webserver complète (swarm, images, deploy, attente, liste)"
     cmds:
     - task: env:init
     - task: webserver:swarm-init
-    - task: webserver:create-network
     - task: webserver:getpull-image
     - task: webserver:deploy
     - task: webserver:waiting

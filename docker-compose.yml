@@ -1,10 +1,13 @@
+# Réseaux GÉRÉS par la stack (créés au `deploy`, supprimés au `rm`) :
+# pas de `external: true` pour que `docker compose config` et le lint
+# passent sans réseaux pré-créés. Si d'anciens réseaux externes du même
+# nom existent (déploiements antérieurs), les supprimer une fois :
+# `docker network rm proxywebserver serverwebserver`.
 networks:
   proxywebserver:
     driver: overlay
-    external: true
   serverwebserver:
     driver: overlay
-    external: true
 
 volumes:
   traefik_certs:
@@ -142,7 +145,7 @@ services:
       retries: 3
       start_period: 60s
     networks:
-      - serverlampy
+      - serverwebserver
     deploy:
       resources:
         limits:
