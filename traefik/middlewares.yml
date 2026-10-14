@@ -5,7 +5,12 @@ http:
         stsSeconds: 31536000
         stsIncludeSubdomains: true
         stsPreload: true
-    httptohttps:
-      redirectscheme:
-        scheme: https
-        permanent: true
+    # Protège le dashboard Traefik (router `proxy`, voir docker-compose.yml).
+    # DEV UNIQUEMENT : login `admin` ci-dessous. Pour changer le mot de
+    # passe, utilisez la tâche dédiée (hash APR1 régénéré + vérifié) :
+    #   task webserver:dashboard-password
+    # Après changement : redéployer (`task webserver:deploy`).
+    dashboard-auth:
+      basicauth:
+        users:
+          - 'admin:$apr1$CxmLfDU0$QXbuG61HWkH22j.8Wo7v01'

@@ -11,6 +11,7 @@ includes:
   nodejs: ./taskfiles/nodejs/Taskfile.yml
   download: ./taskfiles/download/Taskfile.yml
   lint: ./taskfiles/lint/Taskfile.yml
+  help: ./taskfiles/help/Taskfile.yml
 
 vars:
   # Variables avec valeurs par défaut depuis .env ou valeurs de fallback
@@ -56,7 +57,7 @@ tasks:
     desc: "Affiche l'aide détaillée"
     aliases: [ h ]
     cmds:
-    - task: default
+    - task: help:default
 
   webserver:swarm-init:
     desc: "Initialise le projet en exécutant les tâches d'initialisation"
@@ -122,6 +123,73 @@ tasks:
     - task: webserver:waiting
     - task: webserver:ls
 
+  webserver:dashboard-password:
+    desc: "Change le mot de passe du dashboard Traefik (basic-auth)"
+    silent: true
+    summary: |
+      Régénère le hash APR1 du middleware `dashboard-auth` dans
+      `traefik/middlewares.yml` (pas de backup `.bak` : fichier suivi,
+      `git diff` fait foi — annulation via `git checkout -- <fichier>`).
+
+      Variables:
+      - DASHBOARD_USER: login (défaut: admin)
+      - DASHBOARD_PASSWORD: mot de passe (demandé en interactif, masqué ;
+        requis en non-interactif — passé en var, il reste dans l'historique
+        shell, préférez le prompt)
+      - MIDDLEWARES_FILE: fichier à mettre à jour
+        (défaut: ./traefik/middlewares.yml)
+
+      Exemples:
+      task webserver:dashboard-password
+      task webserver:dashboard-password DASHBOARD_PASSWORD='mon-secret'
+
+      Après changement : redéployer (`task webserver:deploy`), le provider
+      `file` de Traefik ne recharge pas à chaud sans `watch: true`.
+    vars:
+      DASHBOARD_USER: '{{.DASHBOARD_USER | default "admin"}}'
+      DASHBOARD_PASSWORD: '{{.DASHBOARD_PASSWORD | default ""}}'
+      MIDDLEWARES_FILE: '{{.MIDDLEWARES_FILE | default "./traefik/middlewares.yml"}}'
+    preconditions:
+    - sh: command -v openssl
+      msg: "openssl n'est pas installé (requis pour générer le hash APR1)"
+    - sh: test -f {{.MIDDLEWARES_FILE}}
+      msg: "Fichier {{.MIDDLEWARES_FILE}} introuvable"
+    cmds:
+    - |
+      password="{{.DASHBOARD_PASSWORD}}"
+      if [ -z "$password" ]; then
+        if [ ! -t 0 ]; then
+          echo "❌ DASHBOARD_PASSWORD est requis en non-interactif"
+          exit 1
+        fi
+        printf "Mot de passe pour '{{.DASHBOARD_USER}}' : "
+        read -r -s password
+        echo ""
+        printf "Confirmer le mot de passe : "
+        read -r -s password_confirm
+        echo ""
+        if [ "$password" != "$password_confirm" ]; then
+          echo "❌ Les mots de passe ne correspondent pas"
+          exit 1
+        fi
+      fi
+      if [ -z "$password" ]; then
+        echo "❌ Mot de passe vide refusé"
+        exit 1
+      fi
+
+      hash="$(openssl passwd -apr1 "$password")"
+      # Le hash APR1 contient / . $ : délimiteur # choisi en conséquence ;
+      # vérification en chaînes fixes (grep -F), sans regex.
+      sed -i -E "s#^([[:space:]]*-[[:space:]]*'){{.DASHBOARD_USER}}:[^']*#\1{{.DASHBOARD_USER}}:$hash#" "{{.MIDDLEWARES_FILE}}"
+      if grep -qF "{{.DASHBOARD_USER}}:$hash" "{{.MIDDLEWARES_FILE}}"; then
+        echo "✅ Mot de passe '{{.DASHBOARD_USER}}' mis à jour dans {{.MIDDLEWARES_FILE}}"
+        echo "💡 Redéployez pour appliquer : task webserver:deploy"
+      else
+        echo "❌ Échec de la mise à jour (ligne '{{.DASHBOARD_USER}}:' introuvable ?)"
+        exit 1
+      fi
+
   webserver:bash:
     desc: "Ouvre un shell bash dans le conteneur MariaDB"
     internal: true
@@ -157,14 +225,6 @@ tasks:
     - task: webserver:bash
       vars:
         CONTAINER: redis
-
-  bash:postgresql:
-    desc: "Ouvre un shell bash dans le conteneur PostgreSQL"
-    silent: true
-    cmds:
-    - task: webserver:bash
-      vars:
-        CONTAINER: postgresql
 
   bash:mailtest:
     desc: "Ouvre un shell bash dans le conteneur MailTest"

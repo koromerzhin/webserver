@@ -15,7 +15,7 @@ volumes:
 
 services:
   redmine:
-    image: redmine:6.1.0
+    image: redmine:6.1.5
     networks:
       - serverwebserver
       - proxywebserver
@@ -33,9 +33,14 @@ services:
         - "traefik.http.routers.redmine.rule=Host(`redmine.traefik.me`)"
         - "traefik.http.routers.redmine-tls.tls.domains[0].main=redmine.traefik.me"
         - "traefik.http.routers.redmine.tls=true"
+        - "traefik.http.routers.redmine.middlewares=hsts@file"
         - "traefik.http.services.redmine.loadbalancer.server.port=3000"
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
   nextcloud:
-    image: nextcloud:32.0.0-apache
+    image: nextcloud:32.0.15-apache
     environment:
       - SMTP_HOST=mailtest
       - MYSQL_DATABASE=nextcloud_bdd
@@ -58,9 +63,14 @@ services:
         - "traefik.http.routers.nextcloud.rule=Host(`nextcloud.traefik.me`)"
         - "traefik.http.routers.nextcloud-tls.tls.domains[0].main=nextcloud.traefik.me"
         - "traefik.http.routers.nextcloud.tls=true"
+        - "traefik.http.routers.nextcloud.middlewares=hsts@file"
         - "traefik.http.services.nextcloud.loadbalancer.server.port=80"
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
   jenkins:
-    image: jenkins/jenkins:lts
+    image: jenkins/jenkins:2.586
     volumes:
       - jenkins_data:/var/jenkins_home
     networks:
@@ -72,9 +82,17 @@ services:
         - "traefik.http.routers.jenkins.rule=Host(`jenkins.traefik.me`)"
         - "traefik.http.routers.jenkins-tls.tls.domains[0].main=jenkins.traefik.me"
         - "traefik.http.routers.jenkins.tls=true"
+        - "traefik.http.routers.jenkins.middlewares=hsts@file"
         - "traefik.http.services.jenkins.loadbalancer.server.port=8080"
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
   mercure:
-    image: dunglas/mercure:v0.20
+    # Majeure v1.x (v1.1.2) : vars JWT inchangées (vérifiées dans le Caddyfile
+    # amont) ; à valider au deploy : publication anonyme (ALLOW_ANONYMOUS
+    # ignoré ? → MERCURE_EXTRA_DIRECTIVES).
+    image: dunglas/mercure:v1.1.2
     environment:
       MERCURE_PUBLISHER_JWT_KEY: ${MERCURE_PUBLISHER_JWT_KEY}
       MERCURE_SUBSCRIBER_JWT_KEY: ${MERCURE_SUBSCRIBER_JWT_KEY}
@@ -88,15 +106,27 @@ services:
     deploy:
       labels:
         - "traefik.enable=false"
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
   redis:
-    image: redis:8.2.2
+    image: redis:8.10.2
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
     networks:
       - serverwebserver
     deploy:
       labels:
         - "traefik.enable=false"
   mariadb:
-    image: mariadb:12.0.2
+    # Majeure 13.x : sauvegarder les volumes avant le premier démarrage
+    # (upgrade du datadir), puis vérifier les logs d'init.
+    image: mariadb:13.0.2
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --innodb-file-per-table=1 --skip-innodb-read-only-compressed
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -105,13 +135,23 @@ services:
       - ${PWD}/mariadb_init:/docker-entrypoint-initdb.d
       - mariadb_data:/var/lib/mysql
       - ${PWD}/dump:/dump
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -h localhost -uroot -p$MYSQL_ROOT_PASSWORD"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
     networks:
-      - serverwebserver
+      - serverlampy
     deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
       labels:
         - "traefik.enable=false"
   mailtest:
-    image: axllent/mailpit:v1.27
+    image: axllent/mailpit:v1.31.5
     networks:
       - serverwebserver
       - proxywebserver
@@ -121,7 +161,12 @@ services:
         - "traefik.http.routers.mailtest.rule=Host(`mailtest.traefik.me`)"
         - "traefik.http.routers.mailtest-tls.tls.domains[0].main=mailtest.traefik.me"
         - "traefik.http.routers.mailtest.tls=true"
+        - "traefik.http.routers.mailtest.middlewares=hsts@file"
         - "traefik.http.services.mailtest.loadbalancer.server.port=8025"
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:5.2.3
     environment:
@@ -137,9 +182,14 @@ services:
         - "traefik.http.routers.phpmyadmin.rule=Host(`phpmyadmin.traefik.me`)"
         - "traefik.http.routers.phpmyadmin-tls.tls.domains[0].main=phpmyadmin.traefik.me"
         - "traefik.http.routers.phpmyadmin.tls=true"
+        - "traefik.http.routers.phpmyadmin.middlewares=hsts@file"
         - "traefik.http.services.phpmyadmin.loadbalancer.server.port=80"
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
   portainer:
-    image: portainer/portainer-ce:2.35.0
+    image: portainer/portainer-ce:2.45.2
     networks:
       - proxywebserver
     volumes:
@@ -151,9 +201,15 @@ services:
         - "traefik.http.routers.portainer.rule=Host(`portainer.traefik.me`)"
         - "traefik.http.routers.portainer-tls.tls.domains[0].main=portainer.traefik.me"
         - "traefik.http.routers.portainer.tls=true"
+        - "traefik.http.routers.portainer.middlewares=hsts@file"
         - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
   reverse:
-    image: alpine
+    # Alpine épinglé sur la branche 3.23 (patchs de sécurité suivis).
+    image: alpine:3.23
     command: sh -c "cd /etc/ssl/traefik && wget traefik.me/cert.pem -O cert.pem && wget traefik.me/privkey.pem -O privkey.pem"
     volumes:
       - traefik_certs:/etc/ssl/traefik
@@ -163,7 +219,7 @@ services:
       labels:
         - "traefik.enable=false"
   traefik:
-    image: traefik:v3.5.3
+    image: traefik:v3.7.14
     environment:
       TZ: Europe/Paris
     # Enables the web UI and tells Traefik to listen to docker
@@ -185,7 +241,17 @@ services:
       - ${PWD}/traefik/traefik.yml:/etc/traefik/traefik.yml
       - ${PWD}/traefik/middlewares.yml:/etc/traefik/middlewares.yml
       - traefik_certs:/etc/ssl/traefik
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
     deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
       placement:
         constraints:
           - node.role == manager
@@ -194,4 +260,5 @@ services:
         - "traefik.http.routers.proxy.rule=Host(`proxy.traefik.me`)"
         - "traefik.http.routers.proxy-tls.tls.domains[0].main=proxy.traefik.me"
         - "traefik.http.routers.proxy.tls=true"
+        - "traefik.http.routers.proxy.middlewares=dashboard-auth@file,hsts@file"
         - "traefik.http.services.proxy.loadbalancer.server.port=8080"
