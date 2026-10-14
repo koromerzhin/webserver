@@ -18,7 +18,7 @@
   "homepage": "https://github.com/koromerzhin/webserver#readme",
   "devDependencies": {
     "all-contributors-cli": "6.26.*",
-    "cypress": "15.4.*",
+    "cypress": "15.21.*",
     "generate-changelog": "1.8.*",
     "gitmoji-changelog": "2.3.*",
     "jscpd": "4.0.*",
