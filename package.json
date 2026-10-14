@@ -28,6 +28,6 @@
     "readme-md-generator": "1.0.*",
     "release-it": "19.2.*",
     "semantic-git-commit-cli": "3.7.*",
-    "yaml": "2.8.*"
+    "yaml": "2.9.*"
   }
 }
