@@ -73,7 +73,7 @@ services:
           cpus: '0.50'
           memory: 512M
   jenkins:
-    image: jenkins/jenkins:2.586
+    image: jenkins/jenkins:2.587
     volumes:
       - jenkins_data:/var/jenkins_home
     networks:
