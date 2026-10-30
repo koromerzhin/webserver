@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/koromerzhin/webserver#readme",
   "devDependencies": {
-    "all-contributors-cli": "6.26.*",
+    "all-contributors-cli": "7.0.*",
     "cypress": "15.4.*",
     "generate-changelog": "1.8.*",
     "gitmoji-changelog": "2.3.*",
