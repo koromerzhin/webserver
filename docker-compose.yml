@@ -192,7 +192,7 @@ services:
           cpus: '0.50'
           memory: 512M
   portainer:
-    image: portainer/portainer-ce:2.45.2
+    image: portainer/portainer-ce:2.45.3
     networks:
       - proxywebserver
     volumes:
