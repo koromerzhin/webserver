@@ -43,7 +43,7 @@ services:
           cpus: '0.50'
           memory: 512M
   nextcloud:
-    image: nextcloud:32.0.15-apache
+    image: nextcloud:35.0.2-apache
     environment:
       - SMTP_HOST=mailtest
       - MYSQL_DATABASE=nextcloud_bdd
